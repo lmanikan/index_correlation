@@ -1,0 +1,17 @@
+# Database configuration for backfill jobs
+
+postgres:
+  type: postgres
+  url: postgresql://localhost/analytics_db
+  pool_pre_ping: true
+  pool_size: 5
+  max_overflow: 10
+
+bigquery:
+  type: bigquery
+  project_id: my-gcp-project
+  dataset: analytics
+  credentials_path: ~/.config/gcp/credentials.json
+
+# Which database to use by default
+default: postgres

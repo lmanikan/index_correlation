@@ -1,0 +1,17 @@
+# Index configuration - NO CODE CHANGES NEEDED!
+# Add/modify indexes here and the pipeline will use them
+indices:
+  - portfolio: SPX
+    symbol: SPX
+    weight_type: EQUAL_WEIGHT
+    num_components: 500
+    vol_type: LOCAL
+    strikes: [0.8, 0.9, 1.0, 1.1, 1.2]
+    
+  - portfolio: DAX
+    symbol: DAX
+    weight_type: MARKET_CAP
+    num_components: 50
+    vol_type: LOCAL
+    strikes: [0.8, 0.9, 1.0, 1.1, 1.2]
+
