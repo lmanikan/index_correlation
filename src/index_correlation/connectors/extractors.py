@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 
-from src.core.data_models import (
+from index_correlation.core.data_models import (
     DataSourceType,
     IndexVolatility,
     IndexWeights,

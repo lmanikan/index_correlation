@@ -18,13 +18,13 @@ from typing import List, Tuple
 
 from sqlalchemy import create_engine, Engine
 
-from src.config.indices_config import INDICES_CONFIG, Index
-from src.extraction.market_data_extractor import MarketDataExtractor, ExtractionError
-from src.extraction.validation import validate_data_package, ValidationError
-from src.extraction.data_package import DataPackage
-from src.connectors.results_writer import ResultsWriter
-from src.storage.postgres_writer import PostgresResultsWriter
-from src.config.results_config import MULTI_REGION_CONFIG
+from index_correlation.config.indices_config import INDICES_CONFIG, Index
+from index_correlation.extraction.market_data_extractor import MarketDataExtractor, ExtractionError
+from index_correlation.extraction.validation import validate_data_package, ValidationError
+from index_correlation.extraction.data_package import DataPackage
+from index_correlation.connectors.results_writer import ResultsWriter
+from index_correlation.storage.postgres_writer import PostgresResultsWriter
+from index_correlation.config.results_config import MULTI_REGION_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -223,7 +223,7 @@ def main():
             analytics_engine = analytics_module.AnalyticsEngine()
         else:
             # Default import (adjust path as needed)
-            from src.analytics import AnalyticsEngine
+            from index_correlation.analytics import AnalyticsEngine
             analytics_engine = AnalyticsEngine()
     except ImportError as e:
         logger.error(f"Failed to import AnalyticsEngine: {e}")

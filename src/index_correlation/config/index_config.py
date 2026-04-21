@@ -6,8 +6,8 @@ from enum import Enum
 import yaml
 from pathlib import Path
 
-from src.core.data_models import Index
-from src.core.models import WeightType,VolType
+from index_correlation.core.data_models import Index
+from index_correlation.core.models import WeightType,VolType
 
 def load_indices_from_yaml(path: str | Path) -> List[Index]:
     path = Path(path)

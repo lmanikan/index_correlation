@@ -1,4 +1,4 @@
-# High-Level Design: `src/` Architecture
+# High-Level Design: `src/index_correlation/` Architecture
 
 ## 1. Objective
 To build a modular, testable, and configuration-driven pipeline for quantitative finance analytics. The architecture follows a **Ports and Adapters (Hexagonal)** pattern to isolate pure mathematical logic from volatile external data sources.
@@ -7,7 +7,7 @@ To build a modular, testable, and configuration-driven pipeline for quantitative
 
 ## 2. Core Layers
 
-### A. The Shared Kernel (`src/core/`)
+### A. The Shared Kernel (`src/index_correlation/core/`)
 **Decision:** Single source of truth for domain models.
 - **Role:** Defines the immutable data structures used by all layers.
 - **Key Objects:** 
@@ -16,7 +16,7 @@ To build a modular, testable, and configuration-driven pipeline for quantitative
     - `TransformationInput` (DTO): The atomic unit of work for a single calculation.
     - `TrialResults`: The unified output format.
 
-### B. The Logic Hub (`src/analytics/`)
+### B. The Logic Hub (`src/index_correlation/analytics/`)
 **Decision:** Specialized DTOs per Quantity.
 - **Role:** Implements mathematical models (Implied Correlation, Sensitivities).
 - **Structure:**
@@ -25,7 +25,7 @@ To build a modular, testable, and configuration-driven pipeline for quantitative
 - **Interface:** `compute(dto: QuantitySpecificDTO) -> Result`
 - **Why?** Enforces a strict data contract. Adding a new quantity like `correlation_skew` only requires defining a new DTO and its corresponding handler, without bloating the common `TransformationInput`.
 
-### C. The Input Port (`src/extraction/`)
+### C. The Input Port (`src/index_correlation/extraction/`)
 **Decision:** Dependency-injected requirements.
 - **Role:** Translates an `Index` definition into a fetching strategy.
 - **Flow:**
@@ -34,7 +34,7 @@ To build a modular, testable, and configuration-driven pipeline for quantitative
     3. Execute targeted fetches.
     4. Assemble the `DataPackage`.
 
-### D. The Output Port (`src/storage/`)
+### D. The Output Port (`src/index_correlation/storage/`)
 **Decision:** Interface segregation.
 - **Role:** Persists results.
 - **Structure:**
@@ -56,4 +56,4 @@ To build a modular, testable, and configuration-driven pipeline for quantitative
 ## 4. Why This is Better Than Current
 - **No Circular Imports:** `core/` is the base of the pyramid.
 - **Dynamic Growth:** Adding a new math quantity only requires a new class in `analytics/quantities/` and an entry in `indexes.yaml`. No changes to jobs or extractors needed.
-- **Resilience:** If the database schema changes, only `src/extraction/extractors.py` needs an update. The rest of the system is agnostic to table structures.
+- **Resilience:** If the database schema changes, only `src/index_correlation/extraction/extractors.py` needs an update. The rest of the system is agnostic to table structures.

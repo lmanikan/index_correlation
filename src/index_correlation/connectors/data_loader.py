@@ -16,12 +16,12 @@ import logging
 from datetime import date
 from typing import Dict, List, Optional
 
-from src.connectors.extractors import (
+from index_correlation.connectors.extractors import (
     IndexVolExtractor,
     VolUniverseExtractor,
     WeightsExtractor,
 )
-from src.core.data_models import (
+from index_correlation.core.data_models import (
     DataPackage,
     IndexVolatility,
     IndexWeights,

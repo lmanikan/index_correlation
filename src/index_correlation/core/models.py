@@ -6,7 +6,17 @@ from datetime import datetime,date
 from typing import Optional, List, Tuple,Dict
 from enum import Enum
 
-
+@dataclass(frozen=True)
+class TransformationInput:
+    """Common metadata required for any atomic transformation."""
+    index_name: str
+    term: str
+    strike: float
+    index_volatility: float
+    weights: pd.DataFrame  # Columns: [symbol, weight]
+    vols: pd.DataFrame     # Columns: [symbol, volatility]
+    calculation_date: datetime
+    weight_strategy: 'WeightType'
 
 class WeightType(str, Enum):
     MARKET_CAP = "MARKET_CAP"    # Use external weights

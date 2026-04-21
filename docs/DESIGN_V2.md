@@ -38,32 +38,32 @@ Orchestrates the execution:
 - Dispatches to requested `BaseQuantity` implementations.
 - Aggregates results into `TrialResults`.
 
-## 4. Proposed `src/` Restructuring
+## 4. Proposed `src/index_correlation/` Restructuring
 
-### `src/core/` (Unified Models)
+### `src/index_correlation/core/` (Unified Models)
 Consolidate `data_models.py` and `models.py`.
 - **Primary Models:** `Index`, `DataPackage`, `TrialResults`.
 - **Analytics DTOs:** `TransformationInput`, `AnalyticsResult`.
 - **Enums:** `WeightType`, `VolType`, `DataSourceType`.
 
-### `src/config/` (Typed Configuration)
+### `src/index_correlation/config/` (Typed Configuration)
 - `index_config.py`: Loads `Index` objects including the `quantities` list.
 - `database_config.py`: Environment-aware database connection settings.
 
-### `src/extraction/` (Sequential Ingestion)
+### `src/index_correlation/extraction/` (Sequential Ingestion)
 - `loader.py`: Implements the 5-step ingestion flow.
 - `extractors.py`: Atomic database/CSV queries.
 - `validation.py`: Data quality gates.
 
-### `src/analytics/` (Math Core)
+### `src/index_correlation/analytics/` (Math Core)
 - `engine.py`: Orchestration logic.
 - `quantities/`: Individual quantity implementations (correlation, sens, etc.).
 
-### `src/storage/` (Result Persistence)
+### `src/index_correlation/storage/` (Result Persistence)
 - `interface.py`: ABCs for Writers/Readers.
 - `backends/`: Postgres and BigQuery implementations.
 
 ## 5. Next Steps
-1.  **Finalize `src/core/models.py`:** Define the unified models and the new `TransformationInput` DTO.
-2.  **Update `src/analytics/engine.py`:** Refactor `BaseQuantity` and `AnalyticsEngine` to use the DTO.
-3.  **Refactor `src/extraction/loader.py`:** Implement the sequential ingestion logic.
+1.  **Finalize `src/index_correlation/core/models.py`:** Define the unified models and the new `TransformationInput` DTO.
+2.  **Update `src/index_correlation/analytics/engine.py`:** Refactor `BaseQuantity` and `AnalyticsEngine` to use the DTO.
+3.  **Refactor `src/index_correlation/extraction/loader.py`:** Implement the sequential ingestion logic.

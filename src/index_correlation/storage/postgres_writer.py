@@ -5,9 +5,9 @@ import pandas as pd
 from sqlalchemy import create_engine, text, Engine, table, column
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
-from src.core.data_models import TrialResults
-from src.storage.schemas import ALL_SCHEMAS
-from src.connectors.results_writer import (
+from index_correlation.core.data_models import TrialResults
+from index_correlation.storage.schemas import ALL_SCHEMAS
+from index_correlation.connectors.results_writer import (
     ResultsWriter,
     WriterException,
     WriterConnectionError,
@@ -15,7 +15,7 @@ from src.connectors.results_writer import (
     WriterWriteError,
     _should_write_daily_snapshot,
 )
-from src.config.results_config import ResultsStorageConfig, DEFAULT_RESULTS_STORAGE_CONFIG
+from index_correlation.config.results_config import ResultsStorageConfig, DEFAULT_RESULTS_STORAGE_CONFIG
 
 
 class PostgresResultsWriter(ResultsWriter):

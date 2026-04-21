@@ -17,8 +17,8 @@ from datetime import datetime
 
 from sqlalchemy import create_engine
 
-from src.storage.postgres_writer import PostgresResultsWriter
-from src.config.results_config import GLOBAL_STORAGE_CONFIG, MULTI_REGION_CONFIG
+from index_correlation.storage.postgres_writer import PostgresResultsWriter
+from index_correlation.config.results_config import GLOBAL_STORAGE_CONFIG, MULTI_REGION_CONFIG
 
 logger = logging.getLogger(__name__)
 

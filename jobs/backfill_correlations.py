@@ -10,13 +10,13 @@ import pandas as pd
 from sqlalchemy import create_engine, Engine
 from tqdm import tqdm
 
-from src.connectors.extractors import VolUniverseExtractor
-from src.connectors.extractors import WeightsExtractor
-from src.storage.postgres_writer import PostgresResultsWriter
-from src.config.results_config import MULTI_REGION_CONFIG
-from src.config.index_config import load_indices_from_yaml
-from src.transforms.engine import AnalyticsEngine
-from src.core.data_models import Index
+from index_correlation.connectors.extractors import VolUniverseExtractor
+from index_correlation.connectors.extractors import WeightsExtractor
+from index_correlation.storage.postgres_writer import PostgresResultsWriter
+from index_correlation.config.results_config import MULTI_REGION_CONFIG
+from index_correlation.config.index_config import load_indices_from_yaml
+from index_correlation.analytics.engine import AnalyticsEngine
+from index_correlation.core.data_models import Index
 
 # Configure logging
 logging.basicConfig(
@@ -145,8 +145,8 @@ def filter_indices(
 
 
 
-from src.config.database_config import get_database_config
-from src.storage.writer_factory import get_writer
+from index_correlation.config.database_config import get_database_config
+from index_correlation.storage.writer_factory import get_writer
 
 def backfill_correlations(
     from_date: date,

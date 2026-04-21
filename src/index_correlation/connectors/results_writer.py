@@ -2,8 +2,8 @@
 
 from abc import ABC, abstractmethod
 from datetime import datetime, time
-from src.core.data_models import TrialResults
-from src.config.results_config import ResultsStorageConfig
+from index_correlation.core.data_models import TrialResults
+from index_correlation.config.results_config import ResultsStorageConfig
 
 
 class WriterException(Exception):
@@ -47,7 +47,7 @@ def _should_write_daily_snapshot(
     
     Example:
         >>> from datetime import datetime, time
-        >>> from src.config.results_config import MULTI_REGION_CONFIG
+        >>> from index_correlation.config.results_config import MULTI_REGION_CONFIG
         >>> 
         >>> # SPX snapshots at 9 PM UTC ±15 min (8:45-9:15 PM)
         >>> at_8_55_pm = datetime(2025, 12, 21, 20, 55)
@@ -101,8 +101,8 @@ class ResultsWriter(ABC):
     
     Example:
         >>> from sqlalchemy import create_engine
-        >>> from src.storage.postgres_writer import PostgresResultsWriter
-        >>> from src.config.results_config import MULTI_REGION_CONFIG
+        >>> from index_correlation.storage.postgres_writer import PostgresResultsWriter
+        >>> from index_correlation.config.results_config import MULTI_REGION_CONFIG
         >>> from datetime import datetime
         >>> 
         >>> engine = create_engine("postgresql://localhost/analytics_db")
