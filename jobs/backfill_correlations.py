@@ -10,8 +10,8 @@ import pandas as pd
 from sqlalchemy import create_engine, Engine
 from tqdm import tqdm
 
-from src.extraction.VolExtractor import VolExtractor
-from src.extraction.WeightsExtractor import WeightsExtractor
+from src.connectors.extractors import VolUniverseExtractor
+from src.connectors.extractors import WeightsExtractor
 from src.storage.postgres_writer import PostgresResultsWriter
 from src.config.results_config import MULTI_REGION_CONFIG
 from src.config.index_config import load_indices_from_yaml
@@ -183,10 +183,10 @@ def backfill_correlations(
         if db_config.type == "postgres":
             from sqlalchemy import create_engine
             engine = create_engine(db_config.url, pool_pre_ping=True)
-            extractor = VolExtractor(engine)
+            extractor = VolUniverseExtractor(engine)
         else:
             # BigQuery extractor
-            extractor = VolExtractor(
+            extractor = VolUniverseExtractor(
                 project_id=db_config.project_id,
                 dataset=db_config.dataset,
             )

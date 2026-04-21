@@ -356,60 +356,6 @@ class CSVIndexVolExtractor(IndexVolExtractor):
             )
             return None
 
-# ============================================================================
-# Bloomberg Extractors (Placeholder)
-# ============================================================================
-
-class BloombergVolUniverseExtractor(VolUniverseExtractor):
-    """
-    Load vol universe from Bloomberg.
-    
-    [Placeholder for future implementation]
-    """
-    
-    def __init__(self, bbg_connection):
-        """
-        Args:
-            bbg_connection: Bloomberg connection object
-        """
-        self.bbg_connection = bbg_connection
-        logger.info("BloombergVolUniverseExtractor initialized")
-    
-    def extract(
-        self,
-        terms: List[str],
-        as_of_date: date,
-    ) -> Dict[str, Optional[VolSurfaceUniverse]]:
-        """Load vol universe from Bloomberg"""
-        logger.warning("Bloomberg extraction not yet implemented")
-        return {term: None for term in terms}
-
-
-class BloombergIndexVolExtractor(IndexVolExtractor):
-    """
-    Load index volatility from Bloomberg.
-    
-    [Placeholder for future implementation]
-    """
-    
-    def __init__(self, bbg_connection):
-        """
-        Args:
-            bbg_connection: Bloomberg connection object
-        """
-        self.bbg_connection = bbg_connection
-        logger.info("BloombergIndexVolExtractor initialized")
-    
-    def extract(
-        self,
-        portfolio: str,
-        term: str,
-        as_of_date: date,
-    ) -> Optional[IndexVolatility]:
-        """Load index vol from Bloomberg"""
-        logger.warning("Bloomberg extraction not yet implemented")
-        return None
-
 
 # ============================================================================
 # Helper: Load Extractors from Config
@@ -457,8 +403,6 @@ def create_extractors_from_config(config: dict):
     
     if vol_type == 'csv':
         vol_extractor = CSVVolUniverseExtractor(vol_config['path'])
-    elif vol_type == 'bloomberg':
-        vol_extractor = BloombergVolUniverseExtractor(vol_config.get('connection'))
     else:
         raise ValueError(f"Unknown vol extractor type: {vol_type}")
     
@@ -468,8 +412,6 @@ def create_extractors_from_config(config: dict):
     
     if idx_vol_type == 'csv':
         index_vol_extractor = CSVIndexVolExtractor(idx_vol_config['path'])
-    elif idx_vol_type == 'bloomberg':
-        index_vol_extractor = BloombergIndexVolExtractor(idx_vol_config.get('connection'))
     else:
         raise ValueError(f"Unknown index vol extractor type: {idx_vol_type}")
     
