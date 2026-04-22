@@ -1,6 +1,12 @@
-from index_correlation.config.database_config import DatabaseConfig, PostgresConfig, BigQueryConfig
+from index_correlation.config.database_config import (
+    BigQueryConfig,
+    DatabaseConfig,
+    PostgresConfig,
+)
 from index_correlation.config.results_config import ResultsStorageConfig
-from index_correlation.connectors.results_writer import ResultsWriter
+from index_correlation.storage.backends.bigquery_writer import BigQueryResultsWriter
+from index_correlation.storage.backends.postgres_writer import PostgresResultsWriter
+from index_correlation.storage.interface import ResultsWriter
 
 
 def get_writer(
@@ -8,37 +14,17 @@ def get_writer(
     results_config: ResultsStorageConfig,
 ) -> ResultsWriter:
     """
-    Factory to instantiate the appropriate writer based on database config.
-    
-    Args:
-        db_config: PostgresConfig or BigQueryConfig
-        results_config: ResultsStorageConfig (correlation/sensitivity settings)
-    
-    Returns:
-        ResultsWriter instance (PostgresResultsWriter or BigQueryResultsWriter)
+    Factory for results writers.
     """
-    
-    if isinstance(db_config, PostgresConfig):
+    if isinstance(db_config.current, PostgresConfig):
         from sqlalchemy import create_engine
-        from index_correlation.storage.postgres_writer import PostgresResultsWriter
-        
-        engine = create_engine(
-            db_config.url,
-            pool_pre_ping=db_config.pool_pre_ping,
-            pool_size=db_config.pool_size,
-            max_overflow=db_config.max_overflow,
-        )
+
+        engine = create_engine(db_config.current.url)
         return PostgresResultsWriter(engine, config=results_config)
-    
-    elif isinstance(db_config, BigQueryConfig):
-        from index_correlation.storage.bigquery_writer import BigQueryResultsWriter
-        
-        return BigQueryResultsWriter(
-            project_id=db_config.project_id,
-            dataset_id=db_config.dataset,
-            credentials_path=db_config.credentials_path,
-            config=results_config,
-        )
-    
+    elif isinstance(db_config.current, BigQueryConfig):
+        from google.cloud import bigquery
+
+        client = bigquery.Client(project=db_config.current.project)
+        return BigQueryResultsWriter(client, config=results_config)
     else:
-        raise ValueError(f"Unknown database config type: {type(db_config)}")
+        raise ValueError(f"Unsupported database type: {type(db_config.current)}")

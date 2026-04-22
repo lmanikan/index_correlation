@@ -1,26 +1,29 @@
 # PostgreSQL Results Writer Implementation
 
 from datetime import datetime, timedelta
+
 import pandas as pd
-from sqlalchemy import create_engine, text, Engine, table, column
+from sqlalchemy import Engine, column, table, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
-from index_correlation.core.data_models import TrialResults
-from index_correlation.storage.schemas import ALL_SCHEMAS
-from index_correlation.connectors.results_writer import (
+from index_correlation.config.results_config import (
+    DEFAULT_RESULTS_STORAGE_CONFIG,
+    ResultsStorageConfig,
+)
+from index_correlation.core.models import TrialResults
+from index_correlation.storage.interface import (
     ResultsWriter,
     WriterException,
-    WriterConnectionError,
     WriterTableError,
     WriterWriteError,
     _should_write_daily_snapshot,
 )
-from index_correlation.config.results_config import ResultsStorageConfig, DEFAULT_RESULTS_STORAGE_CONFIG
+from index_correlation.storage.schemas import ALL_SCHEMAS
 
 
 class PostgresResultsWriter(ResultsWriter):
     """PostgreSQL implementation of ResultsWriter using SQLAlchemy."""
-    
+
     def __init__(
         self,
         engine: Engine,
@@ -28,14 +31,14 @@ class PostgresResultsWriter(ResultsWriter):
     ):
         """
         Initialize PostgreSQL writer.
-        
+
         Args:
             engine: SQLAlchemy Engine connected to PostgreSQL database
             config: Storage configuration
         """
         self.engine = engine
         self.config = config
-    
+
     def ensure_tables_exist(self) -> None:
         """Create tables if they don't exist."""
         try:
@@ -45,12 +48,12 @@ class PostgresResultsWriter(ResultsWriter):
                     conn.execute(text(sql))
                 conn.commit()
         except Exception as e:
-            raise WriterTableError(f"Failed to create tables: {e}")
-    
+            raise WriterTableError(f"Failed to create tables: {e}") from e
+
     def write_trial(self, trial: TrialResults, as_of: datetime) -> None:
         """
         Write trial results to PostgreSQL.
-        
+
         Flow:
         1. Append correlations to intraday table
         2. Upsert latest sensitivities
@@ -61,16 +64,16 @@ class PostgresResultsWriter(ResultsWriter):
             # Get DataFrames from trial
             corr_df = trial.to_dataframe()
             sens_df = trial.sensitivities_to_dataframe()
-            
+
             with self.engine.connect() as conn:
                 # 1. Append intraday correlations
                 if not corr_df.empty:
                     self._write_intraday_correlations(conn, corr_df, as_of)
-                
+
                 # 2. Upsert latest sensitivities
                 if not sens_df.empty:
                     self._upsert_latest_sensitivities(conn, sens_df, as_of)
-                
+
                 # 3. Write daily snapshot if at snapshot time (index-specific)
                 # Only writes ONCE per day per index
                 if _should_write_daily_snapshot(
@@ -80,23 +83,23 @@ class PostgresResultsWriter(ResultsWriter):
                 ):
                     if not corr_df.empty:
                         self._upsert_daily_correlations(conn, corr_df, as_of)
-                
+
                 # 4. Clean up old intraday data
                 self.cleanup_old_intraday(as_of)
-                
+
                 conn.commit()
-        
+
         except WriterException:
             raise
         except Exception as e:
-            raise WriterWriteError(f"Failed to write trial: {e}")
-    
+            raise WriterWriteError(f"Failed to write trial: {e}") from e
+
     def cleanup_old_intraday(self, as_of: datetime) -> int:
         """Delete intraday data older than retention period."""
         try:
             retention_days = self.config.correlation.five_min_retention_days
             cutoff_date = as_of - timedelta(days=retention_days)
-            
+
             with self.engine.connect() as conn:
                 result = conn.execute(
                     text(
@@ -107,10 +110,10 @@ class PostgresResultsWriter(ResultsWriter):
                 )
                 conn.commit()
                 return result.rowcount
-        
+
         except Exception as e:
-            raise WriterWriteError(f"Cleanup failed: {e}")
-    
+            raise WriterWriteError(f"Cleanup failed: {e}") from e
+
     def _write_intraday_correlations(
         self, conn, df: pd.DataFrame, as_of: datetime
     ) -> None:
@@ -118,16 +121,18 @@ class PostgresResultsWriter(ResultsWriter):
         # Prepare data
         records = []
         for _, row in df.iterrows():
-            records.append({
-                "as_of_datetime": as_of,
-                "index_name": row["index"],
-                "term": row["term"],
-                "strike": row["strike"],
-                "implied_correlation": row["implied_correlation"],
-                "index_volatility": row.get("index_volatility", 0),
-                "num_components": row.get("num_components", 0),
-            })
-        
+            records.append(
+                {
+                    "as_of_datetime": as_of,
+                    "index_name": row["index"],
+                    "term": row["term"],
+                    "strike": row["strike"],
+                    "implied_correlation": row["implied_correlation"],
+                    "index_volatility": row.get("index_volatility", 0),
+                    "num_components": row.get("num_components", 0),
+                }
+            )
+
         # Insert
         if records:
             conn.execute(
@@ -140,7 +145,7 @@ class PostgresResultsWriter(ResultsWriter):
                 ),
                 records,
             )
-    
+
     def _upsert_latest_sensitivities(
         self, conn, df: pd.DataFrame, as_of: datetime
     ) -> None:
@@ -157,21 +162,23 @@ class PostgresResultsWriter(ResultsWriter):
             column("as_of_datetime"),
             column("updated_at"),
         )
-        
+
         records = []
         for _, row in df.iterrows():
-            records.append({
-                "index_name": row["index"],
-                "term": row["term"],
-                "strike": row["strike"],
-                "symbol": row["symbol"],
-                "delta": row.get("delta", 0),
-                "elasticity": row.get("elasticity", 0),
-                "sens_type": row.get("type", "component"),
-                "as_of_datetime": as_of,
-                "updated_at": datetime.utcnow(),
-            })
-        
+            records.append(
+                {
+                    "index_name": row["index"],
+                    "term": row["term"],
+                    "strike": row["strike"],
+                    "symbol": row["symbol"],
+                    "delta": row.get("delta", 0),
+                    "elasticity": row.get("elasticity", 0),
+                    "sens_type": row.get("type", "component"),
+                    "as_of_datetime": as_of,
+                    "updated_at": datetime.utcnow(),
+                }
+            )
+
         if records:
             insert_stmt = pg_insert(sensitivities_latest).values(records)
             upsert_stmt = insert_stmt.on_conflict_do_update(
@@ -185,12 +192,12 @@ class PostgresResultsWriter(ResultsWriter):
                 },
             )
             conn.execute(upsert_stmt)
-    
+
     def _upsert_daily_correlations(
         self, conn, df: pd.DataFrame, as_of: datetime
     ) -> None:
         """Upsert correlations to daily snapshot table.
-        
+
         IMPORTANT: Only writes ONCE per day per index.
         Checks if snapshot already exists for this (date, type, index) tuple,
         skips if already snapped today.
@@ -200,7 +207,7 @@ class PostgresResultsWriter(ResultsWriter):
         snapshot_config = self.config.correlation.get_snapshot_config(index_portfolio)
         snapshot_type = snapshot_config.snapshot_type
         snapshot_date = as_of.date()
-        
+
         # Check if we already snapped for this index today
         existing_snap = conn.execute(
             text(
@@ -215,11 +222,11 @@ class PostgresResultsWriter(ResultsWriter):
                 "index_name": index_portfolio,
             },
         ).scalar()
-        
+
         # If we already snapped today, skip
         if existing_snap > 0:
             return
-        
+
         # Otherwise, write the snapshot
         correlations_daily = table(
             "correlations_daily",
@@ -233,21 +240,23 @@ class PostgresResultsWriter(ResultsWriter):
             column("num_components"),
             column("as_of_datetime"),
         )
-        
+
         records = []
         for _, row in df.iterrows():
-            records.append({
-                "snapshot_date": snapshot_date,
-                "snapshot_type": snapshot_type,
-                "index_name": row["index"],
-                "term": row["term"],
-                "strike": row["strike"],
-                "implied_correlation": row["implied_correlation"],
-                "index_volatility": row.get("index_volatility", 0),
-                "num_components": row.get("num_components", 0),
-                "as_of_datetime": as_of,
-            })
-        
+            records.append(
+                {
+                    "snapshot_date": snapshot_date,
+                    "snapshot_type": snapshot_type,
+                    "index_name": row["index"],
+                    "term": row["term"],
+                    "strike": row["strike"],
+                    "implied_correlation": row["implied_correlation"],
+                    "index_volatility": row.get("index_volatility", 0),
+                    "num_components": row.get("num_components", 0),
+                    "as_of_datetime": as_of,
+                }
+            )
+
         if records:
             insert_stmt = pg_insert(correlations_daily).values(records)
             upsert_stmt = insert_stmt.on_conflict_do_update(

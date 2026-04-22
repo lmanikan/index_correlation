@@ -5,13 +5,14 @@ indices:
     symbol: SPX
     weight_type: EQUAL_WEIGHT
     num_components: 500
-    vol_type: LOCAL
+    vol_type: SVOL
     strikes: [0.8, 0.9, 1.0, 1.1, 1.2]
+    quantities: ["implied_correlation", "correlation_sensitivities"]
     
   - portfolio: DAX
     symbol: DAX
     weight_type: MARKET_CAP
     num_components: 50
-    vol_type: LOCAL
+    vol_type: SVOL
     strikes: [0.8, 0.9, 1.0, 1.1, 1.2]
-
+    quantities: ["implied_correlation"]

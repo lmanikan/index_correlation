@@ -1,16 +1,18 @@
-import pytest
-import pandas as pd
 from datetime import date
+
+import pandas as pd
+import pytest
+
 from index_correlation.core.models import (
-    Index,
-    WeightType,
-    VolType,
-    IndexWeights,
-    DataSourceType,
-    VolSurfaceUniverse,
     ComponentVolatilities,
-    IndexVolatility,
     DataPackage,
+    DataSourceType,
+    Index,
+    IndexVolatility,
+    IndexWeights,
+    VolSurfaceUniverse,
+    VolType,
+    WeightType,
 )
 
 

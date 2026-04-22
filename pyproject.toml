@@ -1,8 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "index-correlation"
 version = "0.1.0"
-description = "Add your description here"
+description = "Modular, production-grade ETL pipeline for implied correlation and quantitative analytics."
 readme = "README.md"
+authors = [
+    { name = "lmanikan" }
+]
 requires-python = ">=3.12"
 dependencies = [
     "google-cloud-bigquery>=3.39.0",
@@ -10,4 +17,38 @@ dependencies = [
     "pyyaml>=6.0.3",
     "sqlalchemy>=2.0.45",
     "tqdm>=4.67.1",
+    "numpy>=1.26.0",
 ]
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.3.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/index_correlation"]
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+# Target Python 3.12
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "W",   # pycodestyle warnings
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+]
+ignore = ["E501"]  # Line length is handled by the formatter
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["index_correlation"]
+

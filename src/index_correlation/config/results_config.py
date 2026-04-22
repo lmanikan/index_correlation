@@ -2,19 +2,18 @@
 
 from dataclasses import dataclass, field
 from datetime import time
-from typing import Dict
 
 
 @dataclass
 class DailySnapshotConfig:
     """Configuration for daily correlation snapshot behavior."""
-    
+
     snapshot_time: time = field(default_factory=lambda: time(16, 0))
     """Time of day to write daily snapshot (default: 4 PM market close)"""
-    
+
     tolerance_minutes: int = 30
     """Tolerance around snapshot_time in minutes (±30 min = 3:30-4:30 PM)"""
-    
+
     snapshot_type: str = "close"
     """Type label for snapshot (e.g., 'close', 'open', 'intraday')"""
 
@@ -22,16 +21,18 @@ class DailySnapshotConfig:
 @dataclass
 class CorrelationStorageConfig:
     """Configuration for correlation storage behavior."""
-    
+
     five_min_retention_days: int = 31
     """Retention period for 5-minute intraday data"""
-    
+
     daily_snapshot: DailySnapshotConfig = field(default_factory=DailySnapshotConfig)
     """Default daily snapshot configuration"""
-    
-    index_specific_snapshots: Dict[str, DailySnapshotConfig] = field(default_factory=dict)
+
+    index_specific_snapshots: dict[str, DailySnapshotConfig] = field(
+        default_factory=dict
+    )
     """Override daily snapshot config per index portfolio name.
-    
+
     Example:
         index_specific_snapshots={
             "SPX_CORR": DailySnapshotConfig(snapshot_time=time(21, 0), tolerance_minutes=15),  # 9 PM UTC
@@ -39,13 +40,13 @@ class CorrelationStorageConfig:
             "NIFTY_CORR": DailySnapshotConfig(snapshot_time=time(9, 0), tolerance_minutes=30),  # 9 AM UTC
         }
     """
-    
+
     def get_snapshot_config(self, index_name: str) -> DailySnapshotConfig:
         """Get snapshot config for specific index, with fallback to default.
-        
+
         Args:
             index_portfolio: Index portfolio name (e.g., "SPX_CORR")
-        
+
         Returns:
             DailySnapshotConfig for this index or default
         """
@@ -55,7 +56,7 @@ class CorrelationStorageConfig:
 @dataclass
 class SensitivityStorageConfig:
     """Configuration for sensitivity storage behavior."""
-    
+
     keep_latest_only: bool = True
     """Whether to keep only latest sensitivity (vs. history)"""
 
@@ -63,11 +64,15 @@ class SensitivityStorageConfig:
 @dataclass
 class ResultsStorageConfig:
     """Master configuration for results storage layer."""
-    
-    correlation: CorrelationStorageConfig = field(default_factory=CorrelationStorageConfig)
+
+    correlation: CorrelationStorageConfig = field(
+        default_factory=CorrelationStorageConfig
+    )
     """Correlation storage configuration"""
-    
-    sensitivity: SensitivityStorageConfig = field(default_factory=SensitivityStorageConfig)
+
+    sensitivity: SensitivityStorageConfig = field(
+        default_factory=SensitivityStorageConfig
+    )
     """Sensitivity storage configuration"""
 
 

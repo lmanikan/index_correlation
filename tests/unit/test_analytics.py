@@ -1,13 +1,15 @@
-import pytest
-import pandas as pd
 from datetime import datetime
 from unittest.mock import MagicMock
-from index_correlation.core.models import CorrelationInput, WeightType
-from index_correlation.analytics.quantities.correlation import (
-    ImpliedCorrelationQuantity,
-    CorrelationSensitivityQuantity,
-)
+
+import pandas as pd
+import pytest
+
 from index_correlation.analytics.engine import AnalyticsEngine
+from index_correlation.analytics.quantities.correlation import (
+    CorrelationSensitivityQuantity,
+    ImpliedCorrelationQuantity,
+)
+from index_correlation.core.models import CorrelationInput, WeightType
 
 
 def test_implied_correlation_calculation():
